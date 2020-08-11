@@ -58,33 +58,33 @@ Next update `initializeTextToSpeech` function to include the introduction announ
 
 ```java
 public class MainActivity extends AppCompatActivity {
-	/* Truncated variable declarations */
+  /* Truncated variable declarations */
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		/* ... Truncated code */
-	}
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    /* ... Truncated code */
+  }
 
-	private void initializeTextToSpeech(Context applicationContext) {
-		textToSpeech = new TextToSpeech(applicationContext, new TextToSpeech.OnInitListener() {
-			@Override
-			public void onInit(int ttsStatus) {
-				speechTranscription.setHint("Loading app ...");
-				speakButton.setEnabled(false);
+  private void initializeTextToSpeech(Context applicationContext) {
+    textToSpeech = new TextToSpeech(applicationContext, new TextToSpeech.OnInitListener() {
+      @Override
+      public void onInit(int ttsStatus) {
+        speechTranscription.setHint("Loading app ...");
+        speakButton.setEnabled(false);
 
-				if (ttsStatus == TextToSpeech.SUCCESS) {
-					/*
-						* ADD the following to have the app speak the welcome message
-					*/
-					textToSpeech.speak("Hi! Welcome to the Wit a.i. voice demo. My name is Wit. What is your name?", TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString());
-					speechTranscription.setHint("Press Speak and say something!");
-					speakButton.setEnabled(true);
-				} else {
-					displayErrorMessage("TextToSpeech", "TextToSpeech initialization failed");
-				}
-			}
-		});
-	}
+        if (ttsStatus == TextToSpeech.SUCCESS) {
+          /*
+            * ADD the following to have the app speak the welcome message
+          */
+          textToSpeech.speak("Hi! Welcome to the Wit a.i. voice demo. My name is Wit. What is your name?", TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString());
+          speechTranscription.setHint("Press Speak and say something!");
+          speakButton.setEnabled(true);
+        } else {
+          displayErrorMessage("TextToSpeech", "TextToSpeech initialization failed");
+        }
+      }
+    });
+  }
 
   /* Truncated code */
 
@@ -153,38 +153,38 @@ Open **app** > **src** > **main** > **java** > **com.facebook.witai.voicedemo** 
 
 ```java
 public class MainActivity extends AppCompatActivity {
-	/* ... Truncated variable declarations */
+  /* ... Truncated variable declarations */
 
-	/*
-		* ADD the following variable declarations
-	*/
-	private OkHttpClient httpClient;
-	private HttpUrl.Builder httpBuilder;
-	private Request.Builder httpRequestBuilder;
+  /*
+    * ADD the following variable declarations
+  */
+  private OkHttpClient httpClient;
+  private HttpUrl.Builder httpBuilder;
+  private Request.Builder httpRequestBuilder;
 
-	/* Go to your Wit.ai app Management > Settings and obtain the Client Access Token */
-	private final String CLIENT_ACCESS_TOKEN = "<YOUR CLIENT ACCESS TOKEN>";
+  /* Go to your Wit.ai app Management > Settings and obtain the Client Access Token */
+  private final String CLIENT_ACCESS_TOKEN = "<YOUR CLIENT ACCESS TOKEN>";
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		/* ... Truncated code */
-	}
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    /* ... Truncated code */
+  }
 
-	/*
-		* ADD the following function to initialize OkHttp for streaming to the Speech API
-	*/
-	private void initializeHttpClient() {
-		httpClient = new OkHttpClient();
-		httpBuilder = HttpUrl.parse("https://api.wit.ai/speech").newBuilder();
-		httpBuilder.addQueryParameter("v", "20200805");
-		httpRequestBuilder = new Request.Builder()
-									.url(httpBuilder.build())
-									.header("Authorization", "Bearer " + CLIENT_ACCESS_TOKEN)
-									.header("Content-Type", "audio/raw")
-									.header("Transfer-Encoding", "chunked");
-	}
+  /*
+    * ADD the following function to initialize OkHttp for streaming to the Speech API
+  */
+  private void initializeHttpClient() {
+    httpClient = new OkHttpClient();
+    httpBuilder = HttpUrl.parse("https://api.wit.ai/speech").newBuilder();
+    httpBuilder.addQueryParameter("v", "20200805");
+    httpRequestBuilder = new Request.Builder()
+                  .url(httpBuilder.build())
+                  .header("Authorization", "Bearer " + CLIENT_ACCESS_TOKEN)
+                  .header("Content-Type", "audio/raw")
+                  .header("Transfer-Encoding", "chunked");
+  }
 
-	/* ... Truncated code */
+  /* ... Truncated code */
 }
 ```
 
@@ -199,53 +199,53 @@ public class MainActivity extends AppCompatActivity {
   /* ... Truncated variable declarations */
 
   /*
-  	* ADD the following variable declartation
+    * ADD the following variable declartation
   */
   private static final int BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL, AUDIO_FORMAT) * 10;
   private static final AtomicBoolean recordingInProgress = new AtomicBoolean(false);
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-		/* ... Truncated code */
-	}
+    /* ... Truncated code */
+  }
 
   /*
-  	* ADD a Runnable to record and stream the voice data to Wit
+    * ADD a Runnable to record and stream the voice data to Wit
   */
   private class StreamRecordingRunnable implements Runnable {
     @Override
     public void run() {
-			final ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
-			RequestBody requestBody = new RequestBody() {
-				@Override
-				public MediaType contentType() {
-						return MediaType.parse("audio/raw;encoding=signed-integer;bits=16;rate=8000;endian=little");
-				}
+      final ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
+      RequestBody requestBody = new RequestBody() {
+        @Override
+        public MediaType contentType() {
+            return MediaType.parse("audio/raw;encoding=signed-integer;bits=16;rate=8000;endian=little");
+        }
 
-				@Override
-				public void writeTo(@NotNull BufferedSink bufferedSink) throws IOException {
-						while (recordingInProgress.get()) {
-								int result = recorder.read(buffer, BUFFER_SIZE);
-								if (result < 0) {
-										throw new RuntimeException("Reading of audio buffer failed: " +
-														getBufferReadFailureReason(result));
-								}
-								bufferedSink.write(buffer);
-								buffer.clear();
-						}
-				}
-			};
+        @Override
+        public void writeTo(@NotNull BufferedSink bufferedSink) throws IOException {
+            while (recordingInProgress.get()) {
+                int result = recorder.read(buffer, BUFFER_SIZE);
+                if (result < 0) {
+                    throw new RuntimeException("Reading of audio buffer failed: " +
+                            getBufferReadFailureReason(result));
+                }
+                bufferedSink.write(buffer);
+                buffer.clear();
+            }
+        }
+      };
 
-			Request request = httpRequestBuilder.post(requestBody).build();
-			try (Response response = httpClient.newCall(request).execute()) {
-					if (response.isSuccessful()) {
-							String responseData = response.body().string();
-							respondToUser(responseData);
-							Log.v("Streaming Response", responseData);
-					}
-			} catch (IOException e) {
-					Log.e("Streaming Response", e.getMessage());
-			}
+      Request request = httpRequestBuilder.post(requestBody).build();
+      try (Response response = httpClient.newCall(request).execute()) {
+          if (response.isSuccessful()) {
+              String responseData = response.body().string();
+              respondToUser(responseData);
+              Log.v("Streaming Response", responseData);
+          }
+      } catch (IOException e) {
+          Log.e("Streaming Response", e.getMessage());
+      }
     }
 
     private String getBufferReadFailureReason(int errorCode) {
@@ -277,66 +277,66 @@ With a configured HTTP client, let's add the Android `AudioRecord` to capture th
 
 ```java
 public class MainActivity extends AppCompatActivity {
-	/* ... Truncated variable declarations */
+  /* ... Truncated variable declarations */
 
-	/*
-		* ADD the following variable declarations
-	*/
-	private AudioRecord recorder;
-	private static final int SAMPLE_RATE = 8000;
-	private static final int CHANNEL = AudioFormat.CHANNEL_IN_MONO;
-	private static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
-	private static final int BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL, AUDIO_FORMAT) * 10;
-	private Thread recordingThread;
+  /*
+    * ADD the following variable declarations
+  */
+  private AudioRecord recorder;
+  private static final int SAMPLE_RATE = 8000;
+  private static final int CHANNEL = AudioFormat.CHANNEL_IN_MONO;
+  private static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+  private static final int BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL, AUDIO_FORMAT) * 10;
+  private Thread recordingThread;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		/* ... Truncated code */
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    /* ... Truncated code */
 
-		/*
-		* UPDATE speakButton OnClickListener to invoke startRecording and stopRecording
-		*/
-		speakButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				Log.d("speakButton", "clicked");
-				if (!recordingInProgress.get()) {
-					startRecording();
-					speakButton.setText("Listening ...");
-				} else {
-					stopRecording();
-					speakButton.setText("Speak");
-				}
-			}
-		});
-	}
+    /*
+    * UPDATE speakButton OnClickListener to invoke startRecording and stopRecording
+    */
+    speakButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        Log.d("speakButton", "clicked");
+        if (!recordingInProgress.get()) {
+          startRecording();
+          speakButton.setText("Listening ...");
+        } else {
+          stopRecording();
+          speakButton.setText("Speak");
+        }
+      }
+    });
+  }
 
-	/*
-		* ADD function to instantiate a new instance of AudioRecord and
-		* start the Runnable to record and stream to the Wit Speech API
-	*/
-	private void startRecording() {
-		recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE, CHANNEL, AUDIO_FORMAT, BUFFER_SIZE);
-		recorder.startRecording();
-		recordingInProgress.set(true);
-		recordingThread = new Thread(new StreamRecordingRunnable(), "Stream Recording Thread");
-		recordingThread.start();
-	}
+  /*
+    * ADD function to instantiate a new instance of AudioRecord and
+    * start the Runnable to record and stream to the Wit Speech API
+  */
+  private void startRecording() {
+    recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE, CHANNEL, AUDIO_FORMAT, BUFFER_SIZE);
+    recorder.startRecording();
+    recordingInProgress.set(true);
+    recordingThread = new Thread(new StreamRecordingRunnable(), "Stream Recording Thread");
+    recordingThread.start();
+  }
 
-	/*
-		* ADD function to stop the recording and release the memory for
-		* AudioRecord, Runnable thread, etc
-	*/
-	private void stopRecording() {
-		if (recorder == null) return;
-		recordingInProgress.set(false);
-		recorder.stop();
-		recorder.release();
-		recorder = null;
-		recordingThread = null;
-	}
+  /*
+    * ADD function to stop the recording and release the memory for
+    * AudioRecord, Runnable thread, etc
+  */
+  private void stopRecording() {
+    if (recorder == null) return;
+    recordingInProgress.set(false);
+    recorder.stop();
+    recorder.release();
+    recorder = null;
+    recordingThread = null;
+  }
 
-	/* ... Truncated code */
+  /* ... Truncated code */
 
 }
 ```
@@ -349,85 +349,85 @@ When the `StreamRecordingRunnable` is finished recording and streaming the voice
 
 ```java
 public class MainActivity extends AppCompatActivity {
-	/*  ... Truncated variable declarations */
+  /*  ... Truncated variable declarations */
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		/* ... Truncated code */
-	}
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    /* ... Truncated code */
+  }
 
-	/*
-		* ADD a function to respond to the user based on the response
-		* returned from the Wit Speech API.
-	*/
-	private void respondToUser(String response) {
-		Log.v("respondToUser", response);
-		String intentName = null;
-		String speakerName = null;
-		String responseText = "";
+  /*
+    * ADD a function to respond to the user based on the response
+    * returned from the Wit Speech API.
+  */
+  private void respondToUser(String response) {
+    Log.v("respondToUser", response);
+    String intentName = null;
+    String speakerName = null;
+    String responseText = "";
 
-		try {
-			JSONObject data = new JSONObject(response);
+    try {
+      JSONObject data = new JSONObject(response);
 
-			// Update the TextView with the voice transcription
-			// Run it on the MainActivity's UI thread since it's the owner
-			final String utterance = data.getString("text");
-			MainActivity.this.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					speechTranscription.setText(utterance);
-				}
-			});
+      // Update the TextView with the voice transcription
+      // Run it on the MainActivity's UI thread since it's the owner
+      final String utterance = data.getString("text");
+      MainActivity.this.runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+          speechTranscription.setText(utterance);
+        }
+      });
 
-			// Get most confident intent
-			JSONObject intent = getMostConfident(data.getJSONArray("intents"));
-			if (intent == null) {
-				textToSpeech.speak("Sorry, I didn't get that. What is your name?", TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString());
-				return;
-			}
-			intentName = intent.getString("name");
-			Log.v("respondToUser", intentName);
+      // Get most confident intent
+      JSONObject intent = getMostConfident(data.getJSONArray("intents"));
+      if (intent == null) {
+        textToSpeech.speak("Sorry, I didn't get that. What is your name?", TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString());
+        return;
+      }
+      intentName = intent.getString("name");
+      Log.v("respondToUser", intentName);
 
-			// Parse and get the most confident entity value for the name
-			JSONObject nameEntity = getMostConfident((data.getJSONObject("entities")).getJSONArray("wit$contact:contact"));
-			speakerName = (String) nameEntity.get("value");
-			Log.v("respondToUser", speakerName);
-		} catch (JSONException e) {
-				e.printStackTrace();
-		}
+      // Parse and get the most confident entity value for the name
+      JSONObject nameEntity = getMostConfident((data.getJSONObject("entities")).getJSONArray("wit$contact:contact"));
+      speakerName = (String) nameEntity.get("value");
+      Log.v("respondToUser", speakerName);
+    } catch (JSONException e) {
+        e.printStackTrace();
+    }
 
-		// Handle intents
-		if (intentName.equals("Greeting_Intent")) {
-			responseText = speakerName != null ? "Nice to meet you " + speakerName : "Nice to meet you";
-			textToSpeech.speak(responseText, TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString());
-		} else {
-			textToSpeech.speak("What did you say is your name?", TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString());
-		}
-	}
+    // Handle intents
+    if (intentName.equals("Greeting_Intent")) {
+      responseText = speakerName != null ? "Nice to meet you " + speakerName : "Nice to meet you";
+      textToSpeech.speak(responseText, TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString());
+    } else {
+      textToSpeech.speak("What did you say is your name?", TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString());
+    }
+  }
 
-	/*
-		* ADD helper function to select the most confident intents and entities
-		* from the response to be used.
-	*/
-	private JSONObject getMostConfident(JSONArray list) {
-		JSONObject confidentObject = null;
-		double maxConfidence = 0.0;
-		for (int i = 0; i < list.length(); i++) {
-			try {
-					JSONObject object = list.getJSONObject(i);
-					double currConfidence = object.getDouble("confidence");
-					if (currConfidence > maxConfidence) {
-						maxConfidence = currConfidence;
-						confidentObject = object;
-					}
-			} catch(JSONException e) {
-				e.printStackTrace();
-			}
-		}
-		return confidentObject;
-	}
+  /*
+    * ADD helper function to select the most confident intents and entities
+    * from the response to be used.
+  */
+  private JSONObject getMostConfident(JSONArray list) {
+    JSONObject confidentObject = null;
+    double maxConfidence = 0.0;
+    for (int i = 0; i < list.length(); i++) {
+      try {
+          JSONObject object = list.getJSONObject(i);
+          double currConfidence = object.getDouble("confidence");
+          if (currConfidence > maxConfidence) {
+            maxConfidence = currConfidence;
+            confidentObject = object;
+          }
+      } catch(JSONException e) {
+        e.printStackTrace();
+      }
+    }
+    return confidentObject;
+  }
 
-	/* ... Truncated code */
+  /* ... Truncated code */
 
 }
 ```
