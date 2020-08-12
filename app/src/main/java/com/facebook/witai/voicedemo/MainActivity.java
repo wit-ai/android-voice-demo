@@ -16,10 +16,21 @@ import android.widget.TextView;
 
 import java.util.UUID;
 
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+
 public class MainActivity extends AppCompatActivity {
     private Button speakButton;
     private TextView speechTranscription;
     private TextToSpeech textToSpeech;
+
+    private OkHttpClient httpClient;
+    private HttpUrl.Builder httpBuilder;
+    private Request.Builder httpRequestBuilder;
+
+    /* Go to your Wit.ai app Management > Settings and obtain the Client Access Token */
+    private static final String CLIENT_ACCESS_TOKEN = "<YOUR CLIENT ACCESS TOKEN>";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +45,24 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize TextToSpeech
         initializeTextToSpeech(this.getApplicationContext());
+
+        // Initialize HTTP Client
+        initializeHttpClient();
+    }
+
+
+    // Instantiate a Request.Builder that can be used for all the streaming requests
+    // https://square.github.io/okhttp/recipes/#post-streaming-kt-java
+    // https://wit.ai/docs/http/20200513#post__speech_link
+    private void initializeHttpClient() {
+        httpClient = new OkHttpClient();
+        httpBuilder = HttpUrl.parse("https://api.wit.ai/speech").newBuilder();
+        httpBuilder.addQueryParameter("v", "20200805");
+        httpRequestBuilder = new Request.Builder()
+                .url(httpBuilder.build())
+                .header("Authorization", "Bearer " + CLIENT_ACCESS_TOKEN)
+                .header("Content-Type", "audio/raw")
+                .header("Transfer-Encoding", "chunked");
     }
 
     // Initialize the Android TextToSpeech
