@@ -1,8 +1,6 @@
 
 # Build an Interactive Voice-Enabled Android App with Wit.ai
 
-### By [Pan Wangperawong](https://twitter.com/itspanw)
-
 ## Overview
 
 In this tutorial, we will be creating a voice-enabled Android app that greets the user. The app will be able to process the user's voice response and respond to the user appropriately. The key things we will explore is how to:
