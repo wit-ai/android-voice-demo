@@ -10,9 +10,11 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
+import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -67,6 +69,41 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize HTTP Client
         initializeHttpClient();
+
+        // Wire up speakButton to an onClickListener
+        speakButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!recordingInProgress.get()) {
+                    startRecording();
+                    speakButton.setText("Listening ...");
+                    Log.d("speakButton", "Start listening ...");
+                }  else {
+                    stopRecording();
+                    speakButton.setText("Speak");
+                    Log.d("speakButton", "Stop listening ...");
+                }
+            }
+        });
+    }
+
+    // Instantiate a new AudioRecord and start streaming the recording to the Wit Speech API
+    private void startRecording() {
+        recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE, CHANNEL, AUDIO_FORMAT, BUFFER_SIZE);
+        recorder.startRecording();
+        recordingInProgress.set(true);
+        recordingThread = new Thread(new StreamRecordingRunnable(), "Stream Recording Thread");
+        recordingThread.start();
+    }
+
+    // Release resources for the AudioRecord and Runnable when recording is stopped
+    private void stopRecording() {
+        if (recorder == null) return;
+        recordingInProgress.set(false);
+        recorder.stop();
+        recorder.release();
+        recorder = null;
+        recordingThread = null;
     }
 
     // Define a Runnable to stream the recording data to the Speech API
