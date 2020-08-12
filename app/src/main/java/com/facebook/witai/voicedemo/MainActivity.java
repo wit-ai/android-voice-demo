@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Processes the response from Speech API and responds to the user appropriately
-    // See here for shape of the response: https://wit.ai/docs/http/20200513#get__message_link
+    // See here for shape of the response: https://wit.ai/docs/http#get__message_link
     private void respondToUser(String response) {
         Log.v("respondToUser", response);
         String intentName = null;
@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Define a Runnable to stream the recording data to the Speech API
-    // https://wit.ai/docs/http/20200513#post__speech_link
+    // https://wit.ai/docs/http#post__speech_link
     private class StreamRecordingRunnable implements Runnable {
         @Override
         public void run() {
@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Instantiate a Request.Builder that can be used for all the streaming requests
     // https://square.github.io/okhttp/recipes/#post-streaming-kt-java
-    // https://wit.ai/docs/http/20200513#post__speech_link
+    // https://wit.ai/docs/http#post__speech_link
     private void initializeHttpClient() {
         httpClient = new OkHttpClient();
         httpBuilder = HttpUrl.parse("https://api.wit.ai/speech").newBuilder();
