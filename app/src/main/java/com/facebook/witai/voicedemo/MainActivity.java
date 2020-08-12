@@ -19,6 +19,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -87,6 +90,75 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // Processes the response from Speech API and responds to the user appropriately
+    // See here for shape of the response: https://wit.ai/docs/http/20200513#get__message_link
+    private void respondToUser(String response) {
+        Log.v("respondToUser", response);
+        String intentName = null;
+        String speakerName = null;
+        String responseText = "";
+
+        try {
+            // Parse the intent name from the Wit.ai response
+            JSONObject data = new JSONObject(response);
+
+            // Update the TextView with the voice transcription
+            // Run it on the MainActivity's UI thread since it's the owner
+            final String utterance = data.getString("text");
+            MainActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    speechTranscription.setText(utterance);
+                }
+            });
+
+            // Get most confident intent
+            JSONObject intent = getMostConfident(data.getJSONArray("intents"));
+            if (intent == null) {
+                textToSpeech.speak("Sorry, I didn't get that. What is your name?", TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString());
+                return;
+            }
+            intentName = intent.getString("name");
+            Log.v("respondToUser", intentName);
+
+            // Parse and get the most confident entity value for the name
+            JSONObject nameEntity = getMostConfident((data.getJSONObject("entities")).getJSONArray("wit$contact:contact"));
+            speakerName = (String) nameEntity.get("value");
+            Log.v("respondToUser", speakerName);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        // Handle intents
+        if (intentName.equals("Greeting_Intent")) {
+            responseText = speakerName != null ? "Nice to meet you " + speakerName : "Nice to meet you";
+            textToSpeech.speak(responseText, TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString());
+        } else {
+            // If there is no matching intent, let the user know and ask them to try again
+            textToSpeech.speak("What did you say is your name?", TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString());
+        }
+    }
+
+    // Get the resolved intent or entity with the highest confidence from Wit Speech API
+    // https://wit.ai/docs/recipes#which-confidence-threshold-should-you-use
+    private JSONObject getMostConfident(JSONArray list) {
+        JSONObject confidentObject = null;
+        double maxConfidence = 0.0;
+        for (int i = 0; i < list.length(); i++) {
+            try {
+                JSONObject object = list.getJSONObject(i);
+                double currConfidence = object.getDouble("confidence");
+                if (currConfidence > maxConfidence) {
+                    maxConfidence = currConfidence;
+                    confidentObject = object;
+                }
+            } catch(JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return confidentObject;
+    }
+
     // Instantiate a new AudioRecord and start streaming the recording to the Wit Speech API
     private void startRecording() {
         recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE, CHANNEL, AUDIO_FORMAT, BUFFER_SIZE);
@@ -137,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
             try (Response response = httpClient.newCall(request).execute()) {
                 if (response.isSuccessful()) {
                     String responseData = response.body().string();
-                    /* To DO: respond to user after receiving a response back from Wit */
+                    respondToUser(responseData);
                     Log.v("Streaming Response", responseData);
                 }
             } catch (IOException e) {
@@ -187,6 +259,11 @@ public class MainActivity extends AppCompatActivity {
 
                 // Check the status of the initialization
                 if (ttsStatus == TextToSpeech.SUCCESS) {
+                    if(CLIENT_ACCESS_TOKEN == "<YOUR CLIENT ACCESS TOKEN>") {
+                        textToSpeech.speak("Hi! Before we start the demo. Please set the client access token.", TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString());
+                    } else {
+                        textToSpeech.speak("Hi! Welcome to the Wit a.i. voice demo. My name is Wit. What is your name?", TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString());
+                    }
                     speechTranscription.setHint("Press Speak and say something!");
                     speakButton.setEnabled(true);
                 } else {
