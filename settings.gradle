@@ -1,0 +1,2 @@
+rootProject.name='Wit.ai Voice Demo'
+include ':app'
