@@ -19,7 +19,7 @@ In this tutorial, we will be creating a voice-enabled Android app that greets th
     *   API Level 26 or greater
     > If you are using a device [enable USB debugging](https://developer.android.com/studio/debug/dev-options)
 
-## Design the User Interaction
+## Conversation Design
 
 When designing applications with voice interactions, it's important to understand the various ways that a user may interact with your app. Some techniques that can help with modeling the conversation is writing a script or creating a flow diagram. For our greeting app, let's write a script to outline it.
 
