@@ -8,6 +8,8 @@ In this tutorial, we will be creating a voice-enabled Android app that greets th
 *   Create and train a Wit app to do natural language processing (NLP)
 *   Integrate Wit with your Android app
 
+https://user-images.githubusercontent.com/857822/127375867-643efe8b-1f24-4d10-a3fa-7ee116f61994.mov
+
 ## Prerequisites
 
 *   Create a [Wit.ai](https://wit.ai/) account
